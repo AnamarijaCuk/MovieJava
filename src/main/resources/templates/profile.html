@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SvijetFilmova</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .navbar {
+            margin-bottom: 20px;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .nav-link {
+            margin-left: 10px;
+        }
+        .action-button {
+            width: 40px;
+            height: 40px;
+            margin-right: 5px;
+            border: 2px solid transparent;
+            transition: all 0.1s ease-in-out;
+        }
+
+        .action-button i {
+            font-size: 18px;
+            transition: color 0.1s ease-in-out;
+        }
+
+        .edit-button {
+            background-color: grey;
+            color: white;
+            border-color: grey;
+        }
+
+        .edit-button:hover {
+            background-color: white;
+            color: grey;
+            border-color: grey;
+        }
+
+        .delete-button {
+            background-color: darkgoldenrod;
+            color: white;
+            border-color: darkgoldenrod;
+        }
+
+        .delete-button:hover {
+            background-color: white;
+            color: darkgoldenrod;
+            border-color: darkgoldenrod;
+        }
+        .form-container {
+            border: 2px solid #2d2b2b;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        .rating-input {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px;
+            display: inline-block;
+            width: 100px;
+            text-align: center;
+            font-size: 18px;
+        }
+        table {
+            table-layout: fixed;
+            width: 100%;
+        }
+        td, th {
+            word-wrap: break-word;
+            white-space: normal;
+        }
+        .btn-primary {
+            background-color: #2d2b2b;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/home">SvijetFilmova</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/profile"><i class="fas fa-user"></i> Profil</a>
+            </li>
+            <li class="nav-item">
+                <form id="logoutForm" th:action="@{/logout}" method="post" style="display: none;">
+                    <input type="hidden" value="$Logout">
+                </form>
+                <a class="nav-link" href="#" onclick="document.getElementById('logoutForm').submit();"><i class="fas fa-sign-out-alt"></i> Odjava</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="container">
+    <h1>SvijetFilmova</h1>
+    <p>Dobrodošli na stranicu za recenzije filmova! Pročitajte recenzije, ocijenite omiljene naslove i otkrijte nove preporuke za gledanje. Pridružite se zajednici SvijetaFilmova i podijelite svoje dojmove. 🎬✨</p>
+
+    <h2>Vaše recenzije</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Redatelj filma</th>
+            <th>Naziv filma</th>
+            <th>Recenzija</th>
+            <th colspan="4">Tekst recenzije</th>
+            <th>Uredi</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="review : ${user_reviews}">
+            <td th:text="${review.getMovieDirector()}"></td>
+            <td th:text="${review.getMovieName()}"></td>
+            <td th:text="${review.getReview()}"></td>
+            <td th:text="${review.getReviewText()}" colspan="4"></td>
+            <td>
+                <button type="button" class="btn action-button edit-button" data-toggle="modal" data-target="#editReviewModal" th:data-id="${review.id}"
+                        th:data-name="${review.movieName}"
+                        th:data-director="${review.movieDirector}"
+                        th:data-review="${review.review}"
+                        th:data-text="${review.reviewText}"
+                        onclick="loadReview(this)">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <form th:action="@{/movie_reviews/delete/{id}(id=${review.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn action-button delete-button" onclick="return confirm('Jeste li sigurni da želite izbrisati ovu recenziju?')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="editReviewModal" tabindex="-1" aria-labelledby="editReviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editReviewModalLabel">Uredi recenziju</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/movie_reviews/edit}" th:object="${movieReview}" method="post">
+                        <input type="hidden" th:field="*{id}" id="editReviewId">
+                        <div class="form-group">
+                            <label for="editMovieName">Naziv filma</label>
+                            <input type="text" th:field="*{movieName}" class="form-control" id="editMovieName">
+                        </div>
+                        <div class="form-group">
+                            <label for="editMovieDirector">Redatelj filma</label>
+                            <input type="text" th:field="*{movieDirector}" class="form-control" id="editMovieDirector">
+                        </div>
+                        <div class="form-group">
+                            <label for="editReview">Recenzija</label>
+                            <input type="number" th:field="*{review}" class="form-control" id="editReview" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="editReviewText">Tekst recenzije</label>
+                            <textarea th:field="*{reviewText}" class="form-control" id="editReviewText"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block mb-2">Spremi promjene</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2>Dodaj novu recenziju</h2>
+    <div class="form-container">
+        <form th:action="@{/movie_reviews/add}" th:object="${movieReview}" method="post">
+            <div class="form-group">
+                <label for="movieName">Naziv filma</label>
+                <input type="text" th:field="*{movieName}" class="form-control" id="movieName">
+                <div th:if="${#fields.hasErrors('movieName')}" th:errors="*{movieName}" class="text-danger"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="movieDirector">Redatelj filma</label>
+                <input type="text" th:field="*{movieDirector}" class="form-control" id="movieDirector">
+                <div th:if="${#fields.hasErrors('movieDirector')}" th:errors="*{movieDirector}" class="text-danger"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="review">Recenzija</label>
+                <input type="number" th:field="*{review}" class="form-control rating-input" id="review" step="0.01">
+                <div th:if="${#fields.hasErrors('review')}" th:errors="*{review}" class="text-danger"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="reviewText">Tekst recenzije</label>
+                <textarea th:field="*{reviewText}" class="form-control" id="reviewText"></textarea>
+                <div th:if="${#fields.hasErrors('reviewText')}" th:errors="*{reviewText}"
+                     class="text-danger"></div>
+            </div>
+
+            <button type="submit" class="btn btn-dark">Pošalji recenziju</button>
+        </form>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    function loadReview(button) {
+        const reviewId = button.getAttribute('data-id');
+        const movieName = button.getAttribute('data-name');
+        const movieDirector = button.getAttribute('data-director');
+        const reviewScore = button.getAttribute('data-review');
+        const reviewText = button.getAttribute('data-text');
+
+
+        document.getElementById('editReviewId').value = reviewId;
+        document.getElementById('editMovieName').value = movieName;
+        document.getElementById('editMovieDirector').value = movieDirector;
+        document.getElementById('editReview').value = reviewScore;
+        document.getElementById('editReviewText').value = reviewText;
+
+        $('#editReviewModal').modal('show');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+version: "3.7"
+services:
+  moviereview:
+    build: .
+    container_name: moviereview
+    image: moviereview:latest
+    environment:
+      - MYSQL_HOST=mysql
+    ports:
+      - "80:8080"
+    networks:
+      - moviereview-network
+    depends_on:
+      - mysql
+    restart: always
+
+  mysql:
+    container_name: mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    networks:
+      - moviereview-network
+    environment:
+      - MYSQL_ROOT_PASSWORD=lozinka
+      - MYSQL_DATABASE=filmovi_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=db2025
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: always
+
+networks:
+  moviereview-network:
+    driver: bridge
+volumes:
+  mysql-data:
+  java-data:
