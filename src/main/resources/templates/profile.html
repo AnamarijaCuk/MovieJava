@@ -75,16 +75,58 @@
         }
         table {
             table-layout: fixed;
+            border-top: 2px solid #2d2b2b;
+            border-bottom: 2px solid #2d2b2b;
             width: 100%;
+            border-collapse: collapse;
         }
+        th {
+            border-bottom: 2px solid black !important; /* Podebljana linija ispod zaglavlja */
+        }
+
         td, th {
             word-wrap: break-word;
             white-space: normal;
+            padding: 8px;
+            text-align: left;
         }
         .btn-primary {
             background-color: #2d2b2b;
             border: none;
         }
+        .modal-dialog {
+            max-width: 700px;
+        }
+
+        .modal-content {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .modal-body {
+            padding: 40px;
+        }
+
+        .modal-title {
+            width: 100%;
+        }
+
+        .modal-body form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .modal-body .form-group {
+            width: 100%;
+            text-align: left;
+        }
+
+        .modal-body .form-control {
+            text-align: left;
+        }
+
+
     </style>
 </head>
 <body>
